@@ -1,3 +1,8 @@
+--- A module for loading LOVE conf.lua files.
+--
+-- @module loadconf
+
+
 local loadconf = {}
 
 local function xload(str, name, env)
@@ -13,15 +18,42 @@ local function xload(str, name, env)
 	return chunk
 end
 
-local sandbox = { 
-	table=table,
-	string=string,
-	os=os,
-	print=print,
-	pairs=pairs,
+local sandbox = {
+	assert=assert,
+	error=error,
+	getmetatable=getmetatable,
 	ipairs=ipairs,
-	next=next
+	next=next,
+	pairs=pairs,
+	pcall=pcall,
+	print=print,
+	rawequal=rawequal,
+	rawget=rawget,
+	rawset=rawset,
+	select=select,
+	setmetatable=setmetatable,
+	tonumber=tonumber,
+	tostring=tostring,
+	type=type,
+	unpack=unpack,
+	_VERSION=_VERSION,
+	xpcall=xpcall,
+	coroutine=coroutine,
+	string=string,
+	table=table,
+	math=math,
+	os = {
+		clock=os.clock,
+		date=os.date,
+		difftime=os.difftime,
+		getenv=os.getenv,
+		time=os.time,
+		tmpname=os.tmpname
+	},
+	newproxy=os.newproxy
 }
+
+sandbox._G = sandbox
 
 local function merge(from, into)
 	for k, v in pairs(from) do
@@ -36,8 +68,7 @@ end
 --- Given the string contents of a conf.lua, returns a table containing the
 --  configuration it represents.
 --  @param str The contents of conf.lua
---  @return table
---  @return nil, err
+--  @return The configuration table, or `nil, err` if an error occured
 function loadconf.parse_string(str)
 	local ok, err
 	local env = setmetatable({love = {}}, {__index = sandbox})
@@ -74,9 +105,8 @@ end
 
 --- Given the filename of a valid conf.lua file, returns a table containing the
 --  configuration it represents.
---  @param str The contents of conf.lua
---  @return table
---  @return nil, err
+--  @param fname The path to the conf.lua file
+--  @return the configuration table, or `nil, err` if an error occured.
 function loadconf.parse_file(fname)
 	local f, str, err
 
