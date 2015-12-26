@@ -100,5 +100,18 @@ describe("loadconf", function()
 			assert.equal('table', type(t))
 		end)
 	end
+
+--	local test_archives = {
+--		"spec/test_confs/love09.love",
+--		"spec/test_confs/love08.love",
+--	}
+--
+--	for _, fname in ipairs(test_archives) do
+--		it(("can load and run %s"):format(fname), function()
+--			local t, err = loadconf.parse_archive(fname)
+--			assert.equal(nil, err)
+--			assert.equal('table', type(t))
+--		end)
+--	end
 end)
 

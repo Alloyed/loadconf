@@ -2,7 +2,6 @@
 --
 -- @module loadconf
 
-
 local loadconf = {}
 
 local function xload(str, name, env)
@@ -84,8 +83,7 @@ function loadconf.parse_string(str)
 	end
 
 	if not env.love.conf then
-		--return nil, "No love.conf"
-		return {}
+		return {} -- No configuration
 	end
 
 	local t = { window = {}, screen = {}, modules = {} }
@@ -122,6 +120,7 @@ function loadconf.parse_file(fname)
 end
 
 function loadconf.write(orig, changes)
+	error("TODO")
 end
 
 loadconf.defaults = {}
