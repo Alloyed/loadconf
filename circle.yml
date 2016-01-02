@@ -11,7 +11,7 @@ dependencies:
         - sudo apt-get install lua5.1 luarocks
         - sudo luarocks install test-scm-1.rockspec --only-deps
     post:
-        - sudo luarocks make --server=http://luarocks.org/manifests/alloyed
+        - sudo luarocks make loadconf-scm-1.rockspec --server=http://luarocks.org/manifests/alloyed
 test:
     override:
         - mkdir -p $CIRCLE_TEST_REPORTS/junit
