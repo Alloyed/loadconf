@@ -4,13 +4,12 @@ general:
             - gh-pages
 
 dependencies:
+    cache_directories:
+        - "~/.luarocks"
     pre:
         - sudo apt-get update
         - sudo apt-get install lua5.1 luarocks
-        - sudo luarocks install luasocket
-        - sudo luarocks install luasec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu
-        - sudo luarocks install busted
-        - sudo luarocks install ldoc
+        - sudo luarocks install test-scm-1.rockspec --only-deps
     post:
         - sudo luarocks make --server=http://luarocks.org/manifests/alloyed
 test:
