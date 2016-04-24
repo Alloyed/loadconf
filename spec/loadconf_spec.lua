@@ -80,6 +80,23 @@ describe("loadconf", function()
 		assert.equal('string', type(err2))
 	end)
 
+	it("catches invalid conf.lua files", function()
+		local fname = "/tmp/conf.lua"
+		local f = io.open(fname, 'w')
+		f:write([[
+		function love.conf(t)
+			require'rocks'()
+			t.identity = "foobar"
+			return t
+		end
+		]])
+		f:close()
+
+		local t, err = loadconf.parse_file(fname)
+		assert.equal(nil, t)
+		assert.equal('string', type(err))
+	end)
+
 	it("can create conf.lua strings from a config table", function()
 		pending("TODO")
 	end)

@@ -64,30 +64,121 @@ local function merge(from, into)
 	end
 end
 
+-- format complex strings.
+local function complex_fmt(str, data, shape)
+	shape = shape or {}
+	-- FIXME: ignore escaped {}
+	return str:gsub("%b{}", function(k)
+		k = k:sub(2, -2)
+		local s = data[k]
+		assert(s ~= nil)
+		if not shape[k] then
+			-- no shape given, just use tostring
+			s = tostring(s)
+		elseif type(shape[k]) == 'string' then
+			-- assume shape is a format string
+			s = string.format(shape[k], s)
+		else
+			-- assume shape is callable and returns a valid string
+			s = shape[k](s)
+		end
+		return s
+	end)
+end
+
+local function slurp(fname)
+	local f, s, err
+	f, err = io.open(fname, 'r')
+	if not f then return nil, err end
+
+	s, err = f:read('*a')
+	if not s then return nil, err end
+	f:close()
+
+	return s
+end
+
+local function line_of(body, n)
+	local err
+	if body:sub(1, 1) == '@' then
+		body, err = slurp(body:sub(2))
+		if not body then
+			return nil, err
+		end
+	end
+
+	if body:sub(-1) ~= '\n' then body = body..'\n' end
+
+	local line_i = 1
+	for line in string.gmatch(body, "(.-)\n") do
+		if n == line_i then
+			return line
+		end
+		line_i = line_i + 1
+	end
+	return nil, "line out of range"
+end
+
+local friendly_msg = [[
+{conf} could not be safely loaded.
+Maybe {conf} has more complex behavior than {program} can recognize,
+in which case you should guard it, like so:
+
+    if love.filesystem then
+        {broken_line}
+    end
+
+Actual error:
+{orig}
+]]
+
+-- Tells the user that they should guard against complex behavior
+local function friendly_error(opts)
+	if opts.friendly ~= true then
+		return function(...) return ... end
+	end
+
+	return function(err)
+		local info = debug.getinfo(2, 'lS')
+		local line = line_of(info.source, info.currentline):gsub("^%s+", "")
+		return complex_fmt(friendly_msg, {
+			conf = info.short_src,
+			program = opts.program or "loadconf",
+			broken_line = line,
+			orig = err
+		})
+	end
+end
+
 --- Given the string contents of a conf.lua, returns a table containing the
 --  configuration it represents.
 --  @param str The contents of conf.lua
+--  @param name The name of conf.lua used in error messages.
+--              Uses same format as load().
+--  @param opts Misc options
 --  @return The configuration table, or `nil, err` if an error occured
-function loadconf.parse_string(str)
+function loadconf.parse_string(str, name, opts)
+	opts = opts or {}
+	name = name or "conf.lua"
+
 	local ok, err
 	local env = setmetatable({love = {}}, {__index = sandbox})
-	ok, err = pcall(xload, str, "conf.lua", env)
-	if not ok then
-		return nil, err
-	end
+	ok, err = pcall(xload, str, name, env)
+	if not ok then return nil, err end
 	local chunk = err
 
-	ok, err = pcall(chunk)
-	if not ok then
-		return nil, err
-	end
+	ok, err = xpcall(chunk, friendly_error(opts))
+	if not ok then return nil, err end
 
 	if not env.love.conf then
 		return {} -- No configuration
 	end
 
 	local t = { window = {}, screen = {}, modules = {} }
-	ok, err = pcall(env.love.conf, t)
+	ok, err = xpcall(function()
+		env.love.conf(t)
+	end, friendly_error(opts))
+
 	if ok then
 		if not t.version then
 			t.version = loadconf.latest_stable_version
@@ -104,23 +195,14 @@ end
 --- Given the filename of a valid conf.lua file, returns a table containing the
 --  configuration it represents.
 --  @param fname The path to the conf.lua file
+--  @param opts Misc options
 --  @return the configuration table, or `nil, err` if an error occured.
-function loadconf.parse_file(fname)
-	local f, str, err
-
-	f, err = io.open(fname, 'r')
-	if not f then return nil, err end
-
-	str, err = f:read('*a')
+function loadconf.parse_file(fname, opts)
+	opts = opts or {}
+	local str, err = slurp(fname)
 	if not str then return nil, err end
 
-	f:close()
-
-	return loadconf.parse_string(str)
-end
-
-function loadconf.write(orig, changes)
-	error("TODO")
+	return loadconf.parse_string(str, "@"..fname)
 end
 
 loadconf.defaults = {}
@@ -198,5 +280,22 @@ loadconf.defaults["0.8.0"] = {
 	}
 }
 -- }}}
+
+local Loadconf = {}
+
+function Loadconf:parse_string(str, name)
+	return loadconf.parse_file(str, name, self)
+end
+
+function Loadconf:parse_file(fname)
+	return loadconf.parse_file(fname, self)
+end
+
+local Loadconf_mt = {__index = Loadconf}
+function loadconf.new(opts)
+	local t = {}
+	for k, v in pairs(opts) do t[k] = v end
+	return setmetatable(t, Loadconf_mt)
+end
 
 return loadconf
