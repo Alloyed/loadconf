@@ -49,7 +49,7 @@ local sandbox = {
 		time=os.time,
 		tmpname=os.tmpname
 	},
-	newproxy=os.newproxy
+	newproxy=newproxy
 }
 
 sandbox._G = sandbox
@@ -121,8 +121,9 @@ end
 
 local friendly_msg = [[
 {conf} could not be safely loaded.
-Maybe {conf} has more complex behavior than {program} can recognize,
-in which case you should guard it, like so:
+If {conf} works inside LOVE but not here, then maybe {conf}
+has more complex behavior than {program} can recognize.
+In that case you should wrap that behavior in a guard, like so:
 
     if love.filesystem then
         {broken_line}
@@ -153,10 +154,10 @@ end
 --- Given the string contents of a conf.lua, returns a table containing the
 --  configuration it represents.
 --  @param str The contents of conf.lua
---  @param name The name of conf.lua used in error messages.
---              Uses same format as load().
---  @param opts Misc options
---  @return The configuration table, or `nil, err` if an error occured
+--  @param name The name of conf.lua used in error messages. Uses same format as `load`.
+--  @param[type=options] opts
+--  @return `love_config`
+--  @error
 function loadconf.parse_string(str, name, opts)
 	opts = opts or {}
 	name = name or "conf.lua"
@@ -183,8 +184,9 @@ function loadconf.parse_string(str, name, opts)
 		if not t.version then
 			t.version = loadconf.latest_stable_version
 		end
-		if loadconf.defaults[t.version] then
-			--merge(loadconf.defaults[t.version], t)
+
+		if opts.include_defaults == true and loadconf.defaults[t.version] then
+			merge(loadconf.defaults[t.version], t)
 		end
 		return t
 	else
@@ -195,8 +197,9 @@ end
 --- Given the filename of a valid conf.lua file, returns a table containing the
 --  configuration it represents.
 --  @param fname The path to the conf.lua file
---  @param opts Misc options
---  @return the configuration table, or `nil, err` if an error occured.
+--  @param[type=options] opts
+--  @return `love_config`
+--  @error
 function loadconf.parse_file(fname, opts)
 	opts = opts or {}
 	local str, err = slurp(fname)
@@ -205,9 +208,88 @@ function loadconf.parse_file(fname, opts)
 	return loadconf.parse_string(str, "@"..fname)
 end
 
+--- The configuration tables produced by running `love.conf`.
+-- @table love_config
+-- @see love/Config_Files
+
+
+--- The optional table all loadconf functions take. customize according to your
+--  use case.
+--  @table options
+--  @field[opt="loadconf"] program What is the program called? Used for friendly errors
+--  @field[opt=false] friendly Enable user-friendly errors
+--  @field[opt=false] include_defaults Enable default values in returned configs
+local opts_defaults = {
+	program          = "loadconf",
+	friendly         = false,
+	include_defaults = false
+}
+
+--- The current stable love version. please submit an issue/pull request if
+--  this is out of date, sorry~
+loadconf.stable_love = "0.10.1"
+
+--- A table containing the default config tables for each version of love.
+--  @usage assert(loadconf.defaults["0.9.2"].window.fullscreentype == "normal")
 loadconf.defaults = {}
 
--- default values for 0.9.2 {{{
+local function default_copy(old_v, version)
+	local old = loadconf.defaults[old_v]
+	local t = {}
+	for k, v in pairs(old) do
+		t[k] = v
+	end
+	t.version = version
+	loadconf.defaults[version] = t
+end
+
+-- default values for 0.10.X {{{
+loadconf.defaults["0.10.1"] = {
+	identity = nil,
+	version = "0.10.1",
+	console = false,
+	window = {
+		title          = "Untitled",
+		icon           = nil,
+		width          = 800,
+		height         = 600,
+		borderless     = false,
+		resizable      = false,
+		minwidth       = 1,
+		minheight      = 1,
+		fullscreen     = false,
+		fullscreentype = "desktop",
+		vsync          = true,
+		msaa           = 0,
+		display        = 1,
+		highdpi        = false,
+		x              = nil,
+		y              = nil
+	},
+	modules = {
+		audio         = true,
+		event         = true,
+		graphics      = true,
+		image         = true,
+		joystick      = true,
+		keyboard      = true,
+		math          = true,
+		mouse         = true,
+		physics       = true,
+		sound         = true,
+		system        = true,
+		timer         = true,
+		touch         = true,
+		video         = true,
+		window        = true,
+		thread        = true,
+	}
+}
+
+default_copy("0.10.1", "0.10.0")
+-- }}}
+
+-- default values for 0.9.X {{{
 loadconf.defaults["0.9.2"] = {
 	identity = nil,
 	version = "0.9.2",
@@ -248,9 +330,12 @@ loadconf.defaults["0.9.2"] = {
 		thread        = true,
 	}
 }
+
+default_copy("0.9.2", "0.9.1")
+default_copy("0.9.2", "0.9.0")
 -- }}}
 
--- default values for 0.8.0 {{{
+-- default values for 0.8.X {{{
 loadconf.defaults["0.8.0"] = {
 	identity = nil,
 	version = "0.8.0",
@@ -283,15 +368,26 @@ loadconf.defaults["0.8.0"] = {
 
 local Loadconf = {}
 
+--- An object-oriented instance of the loadconf module. This carries
+--  configuration state internally so you can set-and-forget the `options`
+--  table.
+--
+--  @type Loadconf
+
+--- @see loadconf.parse_string
 function Loadconf:parse_string(str, name)
 	return loadconf.parse_file(str, name, self)
 end
 
+--- @see loadconf.parse_file
 function Loadconf:parse_file(fname)
 	return loadconf.parse_file(fname, self)
 end
 
 local Loadconf_mt = {__index = Loadconf}
+--- 
+--  @param[type=options] opts
+--  @return a Loadconf instance
 function loadconf.new(opts)
 	local t = {}
 	for k, v in pairs(opts) do t[k] = v end

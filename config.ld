@@ -6,3 +6,8 @@ file={"loadconf.lua"}
 dir="doc"
 sort_modules=true
 use_markdown_titles=true
+backtick_references=true
+
+custom_see_handler("^love/([%w_#]+)$", function(page)
+	return "love/"..page, "https://love2d.org/wiki/" .. page
+end)
