@@ -30,6 +30,9 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Class_Loadconf">Class Loadconf </a></li>
 </ul>
 
 
@@ -52,14 +55,57 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#parse_string">parse_string (str)</a></td>
+	<td class="name" nowrap><a href="#parse_string">parse_string (str, name, opts)</a></td>
 	<td class="summary">Given the string contents of a conf.lua, returns a table containing the
   configuration it represents.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parse_file">parse_file (fname)</a></td>
+	<td class="name" nowrap><a href="#parse_file">parse_file (fname, opts)</a></td>
 	<td class="summary">Given the filename of a valid conf.lua file, returns a table containing the
   configuration it represents.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#love_config">love_config</a></td>
+	<td class="summary">The configuration tables produced by running <code>love.conf</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#options">options</a></td>
+	<td class="summary">The optional table all loadconf functions take.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#defaults">defaults</a></td>
+	<td class="summary">A table containing the default config tables for each version of love.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#stable_love">stable_love</a></td>
+	<td class="summary">The current stable love version.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Loadconf">Class Loadconf </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Loadconf:parse_string">Loadconf:parse_string (str, name)</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Loadconf:parse_file">Loadconf:parse_file (fname)</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Loadconf:new">Loadconf:new (opts)</a></td>
+	<td class="summary">
+
+</td>
 	</tr>
 </table>
 
@@ -72,7 +118,7 @@
     <dl class="function">
     <dt>
     <a name = "parse_string"></a>
-    <strong>parse_string (str)</strong>
+    <strong>parse_string (str, name, opts)</strong>
     </dt>
     <dd>
     Given the string contents of a conf.lua, returns a table containing the
@@ -84,12 +130,34 @@
         <li><span class="parameter">str</span>
          The contents of conf.lua
         </li>
+        <li><span class="parameter">name</span>
+         The name of conf.lua used in error messages. Uses same format as <a href="http://www.lua.org/manual/5.1/manual.html#pdf-load">load</a>.
+        </li>
+        <li><span class="parameter">opts</span>
+            <span class="types"><a class="type" href="index.html#options">options</a></span>
+
+
+
+        </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        The configuration table, or <code>nil, err</code> if an error occured
+        <a href="index.html#love_config">love_config</a>
+    </ol>
+     <h3>Or</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">nil</span></span>
+
+
+</li>
+        <li>
+           <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+
+</li>
     </ol>
 
 
@@ -98,7 +166,7 @@
 </dd>
     <dt>
     <a name = "parse_file"></a>
-    <strong>parse_file (fname)</strong>
+    <strong>parse_file (fname, opts)</strong>
     </dt>
     <dd>
     Given the filename of a valid conf.lua file, returns a table containing the
@@ -110,12 +178,225 @@
         <li><span class="parameter">fname</span>
          The path to the conf.lua file
         </li>
+        <li><span class="parameter">opts</span>
+            <span class="types"><a class="type" href="index.html#options">options</a></span>
+
+
+
+        </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        the configuration table, or <code>nil, err</code> if an error occured.
+        <a href="index.html#love_config">love_config</a>
+    </ol>
+     <h3>Or</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">nil</span></span>
+
+
+</li>
+        <li>
+           <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+
+</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "love_config"></a>
+    <strong>love_config</strong>
+    </dt>
+    <dd>
+    The configuration tables produced by running <code>love.conf</code>.
+
+
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="https://love2d.org/wiki/Config_Files">love/Config_Files</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "options"></a>
+    <strong>options</strong>
+    </dt>
+    <dd>
+    The optional table all loadconf functions take.  customize according to your
+  use case.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">program</span>
+         What is the program called? Used for friendly errors
+         (<em>default</em> "loadconf")
+        </li>
+        <li><span class="parameter">friendly</span>
+         Enable user-friendly errors
+         (<em>default</em> false)
+        </li>
+        <li><span class="parameter">include_defaults</span>
+         Enable default values in returned configs
+         (<em>default</em> false)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "defaults"></a>
+    <strong>defaults</strong>
+    </dt>
+    <dd>
+    A table containing the default config tables for each version of love.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">assert</span>(loadconf.defaults[<span class="string">"0.9.2"</span>].window.fullscreentype == <span class="string">"normal"</span>)</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "stable_love"></a>
+    <strong>stable_love</strong>
+    </dt>
+    <dd>
+    The current stable love version.  please submit an issue/pull request if
+  this is out of date, sorry~
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Class_Loadconf"></a>Class Loadconf </h2>
+
+          <div class="section-description">
+          An object-oriented instance of the loadconf module.  This carries
+  configuration state internally so you can set-and-forget the <a href="index.html#options">options</a>
+  table.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "Loadconf:parse_string"></a>
+    <strong>Loadconf:parse_string (str, name)</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">str</span>
+
+
+
+        </li>
+        <li><span class="parameter">name</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="index.html#parse_string">loadconf.parse_string</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Loadconf:parse_file"></a>
+    <strong>Loadconf:parse_file (fname)</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fname</span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Loadconf instance
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="index.html#parse_file">loadconf.parse_file</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Loadconf:new"></a>
+    <strong>Loadconf:new (opts)</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">opts</span>
+            <span class="types"><a class="type" href="index.html#options">options</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Loadconf instance
     </ol>
 
 
@@ -129,7 +410,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
-<i style="float:right;">Last updated 2016-01-02 21:33:16 </i>
+<i style="float:right;">Last updated 2016-05-07 14:08:46 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
