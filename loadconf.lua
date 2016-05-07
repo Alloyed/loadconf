@@ -141,7 +141,18 @@ local function friendly_error(opts)
 
 	return function(err)
 		local info = debug.getinfo(2, 'lS')
-		local line = line_of(info.source, info.currentline):gsub("^%s+", "")
+		if info.short_src:match("loadconf.lua") then
+		    -- this is actually an internal error
+		    return err
+		end
+
+		local line = line_of(info.source, info.currentline)
+		if not line then
+		    -- could not retrieve source data, return internal err
+		    -- instead
+		    return err
+		end
+		line = line:gsub("^%s+", "")
 		return complex_fmt(friendly_msg, {
 			conf = info.short_src,
 			program = opts.program or "loadconf",
