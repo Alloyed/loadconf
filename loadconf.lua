@@ -190,8 +190,8 @@ end
 --- Given the string contents of a conf.lua, returns a table containing the
 --  configuration it represents.
 --  @param str The contents of conf.lua
---  @param name The name of conf.lua used in error messages. Uses same format as `load`.
---  @param[type=options] opts
+--  @param name The name of conf.lua used in error messages. Uses same format as `load`. Optional.
+--  @param[type=options] opts A configuration table. Optional.
 --  @return `love_config`
 --  @error
 function loadconf.parse_string(str, name, opts)
@@ -237,7 +237,7 @@ end
 --- Given the filename of a valid conf.lua file, returns a table containing the
 --  configuration it represents.
 --  @param fname The path to the conf.lua file
---  @param[type=options] opts
+--  @tparam options opts A configuration table. Optional.
 --  @return `love_config`
 --  @error
 function loadconf.parse_file(fname, opts)
@@ -257,15 +257,15 @@ end
 --  @table options
 --  @field[opt="loadconf"] program What is the program called? Used for friendly errors
 --  @field[opt=false] friendly Enable user-friendly errors
---  @field[opt=false] include_defaults Enable default values in returned configs
+--  @field[opt=false] include_defaults Return default values in parsed configs
 loadconf.default_opts = {
 	program          = "loadconf",
 	friendly         = false,
 	include_defaults = false
 }
 
---- The current stable love version. please submit an issue/pull request if
---  this is out of date, sorry~
+--- The current stable love version, which right now is "0.10.1". Please
+--  submit an issue/pull request if this is out of date, sorry~
 loadconf.stable_love = "0.10.1"
 
 --- A table containing the default config tables for each version of love.
@@ -411,6 +411,23 @@ loadconf.defaults["0.8.0"] = {
 
 local Loadconf = {}
 
+--- 
+--  Create an instanced version of loadconf. This carries its configuration
+--  state in object-oriented way, if you prefer that.
+--  @param[type=options] opts
+--  @return a `Loadconf` instance
+function loadconf.new(opts)
+	local t = {}
+	for k, v in pairs(loadconf.default_opts) do
+		if opts[k] == nil then
+			t[k] = v
+		else
+			t[k] = opts[k]
+		end
+	end
+	return setmetatable(t, Loadconf_mt)
+end
+
 --- An object-oriented instance of the loadconf module. This carries
 --  configuration state internally so you can set-and-forget the `options`
 --  table.
@@ -428,19 +445,5 @@ function Loadconf:parse_file(fname)
 end
 
 local Loadconf_mt = {__index = Loadconf}
---- 
---  @param[type=options] opts
---  @return a Loadconf instance
-function loadconf.new(opts)
-	local t = {}
-	for k, v in pairs(loadconf.default_opts) do
-		if opts[k] == nil then
-			t[k] = v
-		else
-			t[k] = opts[k]
-		end
-	end
-	return setmetatable(t, Loadconf_mt)
-end
 
 return loadconf
