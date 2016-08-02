@@ -14,6 +14,7 @@ local function xload(str, name, env)
 		chunk, err = load(str, name, "bt", env)
 		if not chunk then return nil, err end
 	end
+
 	return chunk
 end
 
@@ -121,7 +122,7 @@ end
 
 local friendly_msg = [[
 {conf} could not be safely loaded.
-If {conf} works inside LOVE but not here, then maybe {conf}
+If {conf} works inside LOVE but not here, then maybe it
 has more complex behavior than {program} can recognize.
 In that case you should wrap that behavior in a guard, like so:
 
@@ -141,6 +142,7 @@ local function friendly_error(opts)
 
 	return function(err)
 		local info = debug.getinfo(2, 'lS')
+		--print(info.source, info.currentline)
 		if info.short_src:match("loadconf.lua") then
 		    -- this is actually an internal error
 		    return err
@@ -153,13 +155,36 @@ local function friendly_error(opts)
 		    return err
 		end
 		line = line:gsub("^%s+", "")
+		local name = "string conf.lua"
+		if info.source:match("^@") then
+			name = info.short_src
+		end
 		return complex_fmt(friendly_msg, {
-			conf = info.short_src,
-			program = opts.program or "loadconf",
+			conf = name,
+			program = opts.program or loadconf.default_opts.program,
 			broken_line = line,
 			orig = err
 		})
 	end
+end
+
+local friendly_parse_msg = [[
+{conf} could not be parsed. This is usually a syntax error. Keep in
+mind that {conf} should be valid {lua_version}!
+
+{orig}
+]]
+
+-- Tells the user that their conf.lua failed to parse
+local function friendly_parse_error(err, name, opts)
+	if opts.friendly ~= true then
+		return err
+	end
+	return complex_fmt(friendly_parse_msg, {
+		conf = name or "string conf.lua",
+		lua_version = _VERSION,
+		orig = err
+	})
 end
 
 --- Given the string contents of a conf.lua, returns a table containing the
@@ -170,14 +195,18 @@ end
 --  @return `love_config`
 --  @error
 function loadconf.parse_string(str, name, opts)
-	opts = opts or {}
-	name = name or "conf.lua"
+	opts = opts or loadconf.default_opts
+	--name = name
 
-	local ok, err
+	local ok, chunk, err
 	local env = setmetatable({love = {}}, {__index = sandbox})
-	ok, err = pcall(xload, str, name, env)
-	if not ok then return nil, err end
-	local chunk = err
+
+	--assert(type(name) == "string")
+	ok, chunk, maybe_err = pcall(xload, str, name, env)
+	if not ok then return nil, chunk end
+	if not chunk then
+		return nil, friendly_parse_error(maybe_err, name, opts)
+	end
 
 	ok, err = xpcall(chunk, friendly_error(opts))
 	if not ok then return nil, err end
@@ -212,17 +241,16 @@ end
 --  @return `love_config`
 --  @error
 function loadconf.parse_file(fname, opts)
-	opts = opts or {}
+	opts = opts or loadconf.default_opts
 	local str, err = slurp(fname)
 	if not str then return nil, err end
 
-	return loadconf.parse_string(str, "@"..fname)
+	return loadconf.parse_string(str, "@"..fname, opts)
 end
 
 --- The configuration tables produced by running `love.conf`.
 -- @table love_config
 -- @see love/Config_Files
-
 
 --- The optional table all loadconf functions take. customize according to your
 --  use case.
@@ -230,7 +258,7 @@ end
 --  @field[opt="loadconf"] program What is the program called? Used for friendly errors
 --  @field[opt=false] friendly Enable user-friendly errors
 --  @field[opt=false] include_defaults Enable default values in returned configs
-local opts_defaults = {
+loadconf.default_opts = {
 	program          = "loadconf",
 	friendly         = false,
 	include_defaults = false
@@ -244,7 +272,7 @@ loadconf.stable_love = "0.10.1"
 --  @usage assert(loadconf.defaults["0.9.2"].window.fullscreentype == "normal")
 loadconf.defaults = {}
 
-local function default_copy(old_v, version)
+local function defaults_copy(old_v, version)
 	local old = loadconf.defaults[old_v]
 	local t = {}
 	for k, v in pairs(old) do
@@ -259,6 +287,9 @@ loadconf.defaults["0.10.1"] = {
 	identity = nil,
 	version = "0.10.1",
 	console = false,
+	gammacorrect = false,
+	externalstorage = false,
+	accelerometerjoystick = true,
 	window = {
 		title          = "Untitled",
 		icon           = nil,
@@ -297,7 +328,8 @@ loadconf.defaults["0.10.1"] = {
 	}
 }
 
-default_copy("0.10.1", "0.10.0")
+defaults_copy("0.10.1", "0.10.0")
+loadconf.defaults["0.10.0"].externalstorage = nil
 -- }}}
 
 -- default values for 0.9.X {{{
@@ -342,8 +374,8 @@ loadconf.defaults["0.9.2"] = {
 	}
 }
 
-default_copy("0.9.2", "0.9.1")
-default_copy("0.9.2", "0.9.0")
+defaults_copy("0.9.2", "0.9.1")
+defaults_copy("0.9.2", "0.9.0")
 -- }}}
 
 -- default values for 0.8.X {{{
@@ -387,7 +419,7 @@ local Loadconf = {}
 
 --- @see loadconf.parse_string
 function Loadconf:parse_string(str, name)
-	return loadconf.parse_file(str, name, self)
+	return loadconf.parse_string(str, name, self)
 end
 
 --- @see loadconf.parse_file
@@ -401,7 +433,13 @@ local Loadconf_mt = {__index = Loadconf}
 --  @return a Loadconf instance
 function loadconf.new(opts)
 	local t = {}
-	for k, v in pairs(opts) do t[k] = v end
+	for k, v in pairs(loadconf.default_opts) do
+		if opts[k] == nil then
+			t[k] = v
+		else
+			t[k] = opts[k]
+		end
+	end
 	return setmetatable(t, Loadconf_mt)
 end
 
