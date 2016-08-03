@@ -410,6 +410,7 @@ loadconf.defaults["0.8.0"] = {
 -- }}}
 
 local Loadconf = {}
+local Loadconf_mt = {__index = Loadconf}
 
 --- 
 --  Create an instanced version of loadconf. This carries its configuration
@@ -443,7 +444,5 @@ end
 function Loadconf:parse_file(fname)
 	return loadconf.parse_file(fname, self)
 end
-
-local Loadconf_mt = {__index = Loadconf}
 
 return loadconf
