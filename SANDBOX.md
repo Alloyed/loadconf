@@ -1,3 +1,6 @@
+Loadconf Format
+===============
+
 Loadconf loads and runs conf.lua files into a new environment, built
 especially for conf.lua files. it behaves like a sandbox, although it
 doesn't provide the same security guarantees a normal sandbox would.
