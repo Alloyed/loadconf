@@ -241,6 +241,7 @@ end
 --  @return `love_config`
 --  @error
 function loadconf.parse_file(fname, opts)
+	print("parse_file", fname)
 	opts = opts or loadconf.default_opts
 	local str, err = slurp(fname)
 	if not str then return nil, err end
@@ -266,7 +267,7 @@ loadconf.default_opts = {
 
 --- The current stable love version, which right now is "0.10.1". Please
 --  submit an issue/pull request if this is out of date, sorry~
-loadconf.stable_love = "0.10.1"
+loadconf.stable_love = "0.10.2"
 
 --- A table containing the default config tables for each version of love.
 --  @usage assert(loadconf.defaults["0.9.2"].window.fullscreentype == "normal")
@@ -283,9 +284,9 @@ local function defaults_copy(old_v, version)
 end
 
 -- default values for 0.10.X {{{
-loadconf.defaults["0.10.1"] = {
+loadconf.defaults["0.10.2"] = {
 	identity = nil,
-	version = "0.10.1",
+	version = "0.10.2",
 	console = false,
 	gammacorrect = false,
 	externalstorage = false,
@@ -328,7 +329,8 @@ loadconf.defaults["0.10.1"] = {
 	}
 }
 
-defaults_copy("0.10.1", "0.10.0")
+defaults_copy("0.10.2", "0.10.1")
+defaults_copy("0.10.2", "0.10.0")
 loadconf.defaults["0.10.0"].externalstorage = nil
 -- }}}
 
