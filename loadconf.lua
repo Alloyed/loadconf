@@ -214,7 +214,7 @@ function loadconf.parse_string(str, name, opts)
 		return {} -- No configuration
 	end
 
-	local t = { window = {}, screen = {}, modules = {} }
+	local t = { window = {}, audio = {}, screen = {}, modules = {} }
 	ok, err = xpcall(function()
 		env.love.conf(t)
 	end, friendly_error(opts))
@@ -265,7 +265,7 @@ loadconf.default_opts = {
 
 --- The current stable love version, which right now is "0.10.2". Please
 --  submit an issue/pull request if this is out of date, sorry~
-loadconf.stable_love = "0.10.2"
+loadconf.stable_love = "11.0"
 
 --- A table containing the default config tables for each version of love.
 --  @usage assert(loadconf.defaults["0.9.2"].window.fullscreentype == "normal")
@@ -280,6 +280,59 @@ local function defaults_copy(old_v, version)
 	t.version = version
 	loadconf.defaults[version] = t
 end
+
+-- default values for 11.0 {{{
+loadconf.defaults["11.0"] = {
+	identity = nil,
+	appendidentity = false,
+	version = "11.0",
+	console = false,
+	accelerometerjoystick = true,
+	externalstorage = false,
+	gammacorrect = false,
+	audio = {
+		mixwithsystem  = true
+	},
+	window = {
+		title          = "Untitled",
+		icon           = nil,
+		width          = 800,
+		height         = 600,
+		borderless     = false,
+		resizable      = false,
+		minwidth       = 1,
+		minheight      = 1,
+		fullscreen     = false,
+		fullscreentype = "desktop",
+		vsync          = 1,
+		msaa           = 0,
+		display        = 1,
+		highdpi        = false,
+		x              = nil,
+		y              = nil
+	},
+	modules = {
+		audio         = true,
+		data          = true,
+		event         = true,
+		font          = true,
+		graphics      = true,
+		image         = true,
+		joystick      = true,
+		keyboard      = true,
+		math          = true,
+		mouse         = true,
+		physics       = true,
+		sound         = true,
+		system        = true,
+		thread        = true,
+		timer         = true,
+		touch         = true,
+		video         = true,
+		window        = true
+	}
+}
+-- }}}
 
 -- default values for 0.10.X {{{
 loadconf.defaults["0.10.2"] = {
