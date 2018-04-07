@@ -263,7 +263,7 @@ loadconf.default_opts = {
 	include_defaults = false
 }
 
---- The current stable love version, which right now is "0.10.2". Please
+--- The current stable love version, which right now is "11.0". Please
 --  submit an issue/pull request if this is out of date, sorry~
 loadconf.stable_love = "11.0"
 
