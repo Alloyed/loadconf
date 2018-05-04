@@ -263,9 +263,9 @@ loadconf.default_opts = {
 	include_defaults = false
 }
 
---- The current stable love version, which right now is "11.0". Please
+--- The current stable love version, which right now is "11.1". Please
 --  submit an issue/pull request if this is out of date, sorry~
-loadconf.stable_love = "11.0"
+loadconf.stable_love = "11.1"
 
 --- A table containing the default config tables for each version of love.
 --  @usage assert(loadconf.defaults["0.9.2"].window.fullscreentype == "normal")
@@ -281,11 +281,11 @@ local function defaults_copy(old_v, version)
 	loadconf.defaults[version] = t
 end
 
--- default values for 11.0 {{{
-loadconf.defaults["11.0"] = {
+-- default values for 11.X {{{
+loadconf.defaults["11.1"] = {
 	identity = nil,
 	appendidentity = false,
-	version = "11.0",
+	version = "11.1",
 	console = false,
 	accelerometerjoystick = true,
 	externalstorage = false,
@@ -332,6 +332,7 @@ loadconf.defaults["11.0"] = {
 		window        = true
 	}
 }
+defaults_copy("11.1", "11.0")
 -- }}}
 
 -- default values for 0.10.X {{{
