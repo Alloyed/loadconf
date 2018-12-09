@@ -1,0 +1,45 @@
+language: python
+sudo: false
+
+env:
+  - LUA="lua=5.1"
+  - LUA="luajit=2.1"
+
+cache:
+    directories:
+        - lua_install
+
+before_install:
+  - pip install hererocks
+  - hererocks lua_install -r^ --$LUA
+  - export PATH=$PATH:$PWD/lua_install/bin # Add directory with all installed binaries to PATH
+
+install:
+  - luarocks install --only-deps test-scm-1.rockspec
+  - luarocks install --only-deps loadconf-scm-1.rockspec
+
+script:
+  #- luacheck -ur .
+  - busted --verbose --coverage
+
+after_success:
+  - "luacov-coveralls --include 'loadconf%.lua'"
+  - "ldoc -d docs_out ."
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: true
+  local-dir: docs_out
+  on:
+    branch: master
+
+branches:
+  except:
+    - gh-pages
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
