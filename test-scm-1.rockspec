@@ -9,7 +9,10 @@ description = {
 }
 dependencies = {
    "busted",
-   "ldoc"
+   "luacheck",
+   "ldoc",
+   "luacov",
+   "luacov-coveralls"
 }
 build = {
    type = "none",
