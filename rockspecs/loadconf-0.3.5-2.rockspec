@@ -1,5 +1,5 @@
 package = "loadconf"
-version = "0.3.5-1"
+version = "0.3.5-2"
 source = {
    url = "git://github.com/Alloyed/loadconf",
    tag = "v0.3.5"
@@ -9,7 +9,7 @@ description = {
    license = "MIT"
 }
 dependencies = {
-   "lua >= 5.1, < 5.4"
+   "lua >= 5.1, < 5.5"
 }
 build = {
    type = "builtin",
