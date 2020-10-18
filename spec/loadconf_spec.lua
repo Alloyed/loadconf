@@ -98,7 +98,7 @@ describe("loadconf", function()
 	end)
 
 	it("generates friendly errors if asked", function()
-		t, err = loadconf.parse_string([[
+		local t, err = loadconf.parse_string([[
 		local
 		function love.conf(t)
 			t.version = "0.8.0"
@@ -152,7 +152,7 @@ describe("loadconf", function()
 		]])
 		f:close()
 
-		local t, err = loadconf.parse_file(fname, {program="DUCKTALES", friendly=true})
+		t, err = loadconf.parse_file(fname, {program="DUCKTALES", friendly=true})
 		assert.equal(nil, t)
 		assert.equal('string', type(err))
 		assert.not_nil(err:match("DUCKTALES"))
@@ -162,6 +162,7 @@ describe("loadconf", function()
 		local lc = loadconf.new{program="DORKTALES", friendly=true}
 		assert.equal("DORKTALES", lc.program)
 
+		local t, err
 		t, err = lc:parse_string([[
 		function love.conf(t)
 			nonexistent()
@@ -175,7 +176,7 @@ describe("loadconf", function()
 		assert.not_nil(err:match("DORKTALES"))
 
 		local fname = "/tmp/conf.lua"
-		f = io.open(fname, 'w')
+		local f = io.open(fname, 'w')
 		f:write([[
 		function love.conf(t)
 			nonexistent()
@@ -186,14 +187,14 @@ describe("loadconf", function()
 		]])
 		f:close()
 
-		local t, err = lc:parse_file(fname)
+		t, err = lc:parse_file(fname)
 		assert.equal(nil, t)
 		assert.equal('string', type(err))
 		assert.not_nil(err:match("DORKTALES"))
 	end)
 
 	it("includes default values if asked", function()
-		t, err = loadconf.parse_string([[
+		local t, _ = loadconf.parse_string([[
 		function love.conf(t)
 			t.version = "0.10.1"
 			return t
@@ -205,7 +206,7 @@ describe("loadconf", function()
 		assert.equal("Untitled", t.window.title)
 		assert.equal(false, t.externalstorage)
 
-		t, err = loadconf.parse_string([[
+		t, _ = loadconf.parse_string([[
 		function love.conf(t)
 			t.version = "0.10.0"
 			return t

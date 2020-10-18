@@ -291,7 +291,8 @@ loadconf.defaults["11.3"] = {
 	externalstorage = false,
 	gammacorrect = false,
 	audio = {
-		mixwithsystem  = true
+		mic = false,
+		mixwithsystem  = true,
 	},
 	window = {
 		title          = "Untitled",
@@ -306,8 +307,11 @@ loadconf.defaults["11.3"] = {
 		fullscreentype = "desktop",
 		vsync          = 1,
 		msaa           = 0,
+		depth          = nil,
+		stencil        = nil,
 		display        = 1,
 		highdpi        = false,
+		usedpiscale    = true,
 		x              = nil,
 		y              = nil
 	},
@@ -333,8 +337,10 @@ loadconf.defaults["11.3"] = {
 	}
 }
 defaults_copy("11.3", "11.2")
-defaults_copy("11.3", "11.1")
-defaults_copy("11.3", "11.0")
+loadconf.defaults["11.2"].audio.mic = nil
+loadconf.defaults["11.2"].window.usedpiscale = nil
+defaults_copy("11.2", "11.1")
+defaults_copy("11.2", "11.0")
 -- }}}
 
 -- default values for 0.10.X {{{
