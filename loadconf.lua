@@ -265,7 +265,7 @@ loadconf.default_opts = {
 
 --- The current stable love version, which right now is "11.3". Please
 --  submit an issue/pull request if this is out of date, sorry~
-loadconf.stable_love = "11.3"
+loadconf.stable_love = "11.5"
 
 --- A table containing the default config tables for each version of love.
 --  @usage assert(loadconf.defaults["0.9.2"].window.fullscreentype == "normal")
@@ -282,10 +282,10 @@ local function defaults_copy(old_v, version)
 end
 
 -- default values for 11.X {{{
-loadconf.defaults["11.3"] = {
+loadconf.defaults["11.5"] = {
 	identity = nil,
 	appendidentity = false,
-	version = "11.3",
+	version = "11.5",
 	console = false,
 	accelerometerjoystick = true,
 	externalstorage = false,
@@ -336,6 +336,8 @@ loadconf.defaults["11.3"] = {
 		window        = true
 	}
 }
+defaults_copy("11.5", "11.4")
+defaults_copy("11.4", "11.3")
 defaults_copy("11.3", "11.2")
 loadconf.defaults["11.2"].audio.mic = nil
 loadconf.defaults["11.2"].window.usedpiscale = nil
